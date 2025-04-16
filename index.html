@@ -1,39 +1,51 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loja Mariana Vest</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Mariana Vest</title>
 </head>
 <body>
-  <header>
-    <h1>Loja Mariana Vest</h1>
-    <nav>
-      <a href="index.html">Início</a>
-      <a href="carrinho.html">Carrinho</a>
-    </nav>
-  </header>
-
-  <main>
-    <section id="produtos" class="produtos">
-
+    <header>
+        <h1>Mariana Vest</h1>
+        <nav>
+            <a href="carrinho.html"><button onclick="novoCar.classList.remove('oculto')"><img src="assets/carrinho.png"> </button></a>
+        </nav>
+        <nav id="itens" class="sandwish oculto">
+            <button onclick="novoCar.classList.remove('oculto')"><img src="assets/carrinho.png"> </button>
+        </nav>
+    </header>
+    <main></main>
+<footer>
+    <h2>&copy; Mariana Vest</h2>
+    <p></p>
+</footer>
+    <section id="listarPedidos" class="modal oculto">
+        <div class="janela">
+            <div>
+                <h2>Pedidos</h2>
+                <button onclick="window.location.reload()">X</button>
+            </div>
+            <span>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço</th>
+                            <th>Subtotal</th>
+                            <th>Remover</th>
+                        </tr>
+                    </thead>
+                </table>
+            </span>
+        </div>
     </section>
-  </main>
-
-  <div id="modal" class="modal">
-    <div class="modal-conteudo">
-      <span id="fechar-modal" class="fechar-modal">&times;</span>
-      <h2 id="modal-nome"></h2>
-      <img id="modal-imagem" src="" alt="" />
-      <p id="modal-descricao"></p>
-      <p>Preço: <span id="modal-preco"></span></p>
-      <p>Peso: <span id="modal-peso"></span> kg</p>
-      <p>Frete: <span id="modal-frete"></span> R$</p>
-      <button id="adicionar-carrinho">Adicionar ao Carrinho</button>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    
 </body>
+ <script src="script.js"></script>
 </html>

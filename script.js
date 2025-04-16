@@ -1,158 +1,144 @@
-const produtos = [
-    {
-      id: 1,
-      nome: "Tênis lindão",
-      descricao: "O tênis mais lindo do mundo",
-      preco: 200.0,
-      peso: 0.5,
-      frete: 0.1,
-      imagem: "https://wellifabio.github.io/produtos-cards/assets/tenis1.png",
-    },
-    {
-      id: 2,
-      nome: "Tênis bunitinho",
-      descricao: "O tênis mais bunitinho de hoje",
-      preco: 180.0,
-      peso: 0.5,
-      frete: 0.1,
-      imagem: "https://wellifabio.github.io/produtos-cards/assets/tenis2.png",
-    },
-    {
-      id: 3,
-      nome: "Bruzinha",
-      descricao: "Camiseta branca simples",
-      preco: 49.9,
-      peso: 0.3,
-      frete: 0.1,
-      imagem: "https://wellifabio.github.io/produtos-cards/assets/camiseta1.png",
-    },
-    {
-      id: 4,
-      nome: "Camiseta Preta",
-      descricao: "Camiseta pretinha básica",
-      preco: 59.9,
-      peso: 0.3,
-      frete: 0.1,
-      imagem: "https://wellifabio.github.io/produtos-cards/assets/camiseta2.png",
-    },
-    {
-      id: 5,
-      nome: "Calsa jeans masculino",
-      descricao: "Calsa jeans masculino, azul básico",
-      preco: 49.9,
-      peso: 1.2,
-      frete: 0.2,
-      imagem: "https://wellifabio.github.io/produtos-cards/assets/calsa1.png",
-    },
-    {
-      id: 6,
-      nome: "Calsa jeans feminino",
-      descricao: "Calsa jeans feminino, azul básico",
-      preco: 49.9,
-      peso: 0.9,
-      frete: 0.2,
-      imagem: "https://wellifabio.github.io/produtos-cards/assets/calsa2.png",
-    },
-  ];
-  
-  // Verifica qual página está sendo exibida
-  const isIndex = document.location.pathname.includes("index");
-  const isCarrinho = document.location.pathname.includes("carrinho");
-  
-  // Funções para index.html
-  if (isIndex) {
-    const container = document.getElementById("produtos");
-    const modal = document.getElementById("modal");
-  
-    produtos.forEach((produto) => {
-      const card = document.createElement("div");
-      card.className = "produto";
-      card.innerHTML = `
-        <img src="${produto.imagem}" alt="${produto.nome}">
-        <div class="produto-info">
-          <h3>${produto.nome}</h3>
-          <p>R$ ${produto.preco.toFixed(2).replace(".", ",")}</p>
-          <button onclick="mostrarDetalhes(${produto.id})">Detalhes</button>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  
-    window.mostrarDetalhes = function (id) {
-      const produto = produtos.find((p) => p.id === id);
-      document.getElementById("modal-nome").textContent = produto.nome;
-      document.getElementById("modal-imagem").src = produto.imagem;
-      document.getElementById("modal-descricao").textContent = produto.descricao;
-      document.getElementById("modal-preco").textContent = `R$ ${produto.preco.toFixed(2).replace(".", ",")}`;
-      document.getElementById("modal-peso").textContent = produto.peso;
-      document.getElementById("modal-frete").textContent = `R$ ${(produto.peso * 0.1).toFixed(2).replace(".", ",")}`;
-      document.getElementById("adicionar-carrinho").onclick = () => adicionarAoCarrinho(produto);
-      modal.style.display = "flex";
-    };
-  
-    document.getElementById("fechar-modal").onclick = () => {
-      modal.style.display = "none";
-    };
-  }
-  
-  function adicionarAoCarrinho(produto) {
-    let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-    const index = carrinho.findIndex((p) => p.id === produto.id);
-    if (index >= 0) {
-      carrinho[index].quantidade += 1;
-    } else {
-      carrinho.push({ ...produto, quantidade: 1 });
-    }
-    localStorage.setItem("carrinho", JSON.stringify(carrinho));
-    alert("Produto adicionado ao carrinho!");
-    document.getElementById("modal").style.display = "none";
-  }
-  
-  // Funções para carrinho.html
-  if (isCarrinho) {
-    const container = document.getElementById("itens-carrinho");
-    const totalSpan = document.getElementById("total");
-  
-    function renderCarrinho() {
-      container.innerHTML = "";
-      let total = 0;
-      const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-  
-      carrinho.forEach((item, index) => {
-        total += item.preco * item.quantidade;
-        const div = document.createElement("div");
-        div.className = "item-carrinho";
-        div.innerHTML = `
-          <img src="${item.imagem}" width="100">
-          <h3>${item.nome}</h3>
-          <p>R$ ${item.preco.toFixed(2).replace(".", ",")}</p>
-          <input type="number" min="0" value="${item.quantidade}" onchange="atualizarQuantidade(${index}, this.value)">
-          <hr/>
+const uri = "http://localhost:5000";
+const dadosFront = "./assets/produtos.json";
+var produtos = [];
+var pedidos = [];
+
+fetch(uri + "/pedidos")
+    .then(resp => {
+        if (!resp.ok) throw new Error("Erro ao buscar pedidos");
+        return resp.json();
+    })
+    .then(dados => {
+        pedidos = dados;
+        preencherPedidos();
+    })
+    .catch(error => console.error(error));
+
+document.querySelector("footer p").textContent = new Date().toLocaleDateString();
+
+fetch(dadosFront)
+    .then(resp => {
+        if (!resp.ok) throw new Error("Erro ao buscar produtos");
+        return resp.json();
+    })
+    .then(dados => {
+        produtos = dados;
+        const main = document.querySelector("main");
+        dados.forEach(produto => {
+            const card = document.createElement("div");
+            card.className = "card";
+            const total = produto.preco + produto.frete;
+
+            card.innerHTML = `
+                <h2>${produto.nome}</h2>
+                <img src="${produto.imagem}" alt="${produto.nome}">
+                <p>${produto.descricao}</p>
+                <p>Preço: R$ ${produto.preco.toFixed(2)}</p>
+                <p>Peso: ${produto.peso.toFixed(2)} Kg</p>
+                <p>Frete: R$ ${produto.frete.toFixed(2)}</p>
+                <p>Total: R$ ${total.toFixed(2)}</p>
+                <button onclick="abrirModalPedido(${produto.id})">Adicionar Ao Carrinho</button>
+            `;
+            main.appendChild(card);
+        });
+    })
+    .catch(error => console.error(error));
+
+function preencherPedidos() {
+    const tbody = document.querySelector("#listarPedidos tbody");
+    tbody.innerHTML = "";
+    pedidos.forEach(pedido => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td data-label="Id">${pedido.id}</td>
+            <td data-label="Data">${new Date(pedido.data).toLocaleDateString()}</td>
+            <td data-label="Hora">${new Date(pedido.data).toLocaleTimeString()}</td>
+            <td data-label="Produto">${pedido.produto}</td>
+            <td data-label="Quantidade">${pedido.qtd}</td>
+            <td data-label="Preço">R$ ${pedido.preco.toFixed(2)}</td>
+            <td data-label="Subtotal">R$ ${(pedido.preco * pedido.qtd).toFixed(2)}</td>
+            <td data-label="Excluir"><button onclick="removePedido(${pedido.id})">-</button></td>
         `;
-        container.appendChild(div);
-      });
-  
-      totalSpan.textContent = total.toFixed(2).replace(".", ",");
+        tbody.appendChild(tr);
+    });
+}
+
+function abrirModalPedido(id) {
+    const produto = produtos.find(produto => produto.id == id);
+    const body = document.querySelector("body");
+    const modal = document.createElement("section");
+    modal.id = "novoPedido";
+    modal.className = "modal";
+    const janela = document.createElement("div");
+    janela.className = "janela";
+    janela.innerHTML = `
+        <div>
+            <h2>Adicionar Produto ao Carrinho</h2>
+            <button onclick="fecharModal()">X</button>
+        </div>
+        <form>
+            <label for="produto">Produto</label>
+            <input type="text" name="produto" value="${produto.nome}" disabled>
+            <label for="preco">Preço</label>
+            <input type="text" name="preco" value="${produto.preco.toFixed(2)}" disabled>
+            <label for="qtd">Quantidade</label>
+            <input type="number" name="qtd" value="1" required>
+            <button type="submit">Adicionar Ao Carrinho</button>
+        </form>
+    `;
+    modal.appendChild(janela);
+    body.appendChild(modal);
+
+    const cadPedido = document.querySelector("#novoPedido form");
+    cadPedido.addEventListener("submit", e => {
+        e.preventDefault();
+        const dados = {
+            id: produto.id,
+            nome: produto.nome,
+            preco: Number(cadPedido.preco.value),
+            qtd: Number(cadPedido.qtd.value),
+            subTotal: (Number(cadPedido.preco.value) * Number(cadPedido.qtd.value)).toFixed(2)
+        };
+
+        let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+        const itemExistente = carrinho.find(item => item.id === dados.id);
+        if (itemExistente) {
+            itemExistente.qtd += dados.qtd;
+            itemExistente.subTotal = (itemExistente.qtd * itemExistente.preco).toFixed(2);
+        } else {
+            carrinho.push(dados);
+        }
+        localStorage.setItem("carrinho", JSON.stringify(carrinho));
+
+        alert("Produto adicionado ao carrinho!");
+        fecharModal();
+    });
+}
+
+function fecharModal() {
+    const modal = document.querySelector("#novoPedido");
+    if (modal) {
+        modal.remove();
     }
-  
-    window.atualizarQuantidade = function (index, valor) {
-      let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-      valor = parseInt(valor);
-      if (valor <= 0) {
-        carrinho.splice(index, 1);
-      } else {
-        carrinho[index].quantidade = valor;
-      }
-      localStorage.setItem("carrinho", JSON.stringify(carrinho));
-      renderCarrinho();
-    };
-  
-    document.getElementById("enviar-pedido").onclick = () => {
-      localStorage.removeItem("carrinho");
-      alert("Pedido enviado com sucesso!");
-      window.location.href = "index.html";
-    };
-  
-    renderCarrinho();
-  }
-  
+}
+
+function removePedido(id) {
+    fetch(uri + "/pedidos/" + id, {
+        method: "DELETE"
+    })
+    .then(resp => {
+        if (!resp.ok) throw new Error("Erro ao remover pedido");
+        return resp.status;
+    })
+    .then(status => {
+        if (status == 204) {
+            alert("Pedido removido com sucesso!");
+            pedidos = pedidos.filter(pedido => pedido.id !== id);
+            preencherPedidos();
+        }
+    })
+    .catch(error => {
+        alert("Erro ao remover pedido!");
+        console.error(error);
+    });
+}

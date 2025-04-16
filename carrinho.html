@@ -1,29 +1,71 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carrinho de Compras</title>
-  <link rel="stylesheet" href="styles1.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Mariana Vest</title>
 </head>
 <body>
-  <header>
-    <h1>Carrinho de Compras</h1>
-    <nav>
-      <a href="index.html">Voltar</a>
-    </nav>
-  </header>
+    <header>
+        <h1>Carrinho de Compras</h1>
+        <button style="float: right; padding: 10px 20px; margin: 10px;" onclick="window.history.back()">Voltar</button>
+    </header>
+    <main>
+        <table border="1" style="width: 100%; text-align: center; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Produto</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="cart-items">
+            </tbody>
+        </table>
+        <h3 style="text-align: right;" id="total-price">Total R$ 0,00</h3>
+        <button id="clear-cart" style="display: block; margin: 20px auto; padding: 10px 20px; background-color: red; color: white; border: none; border-radius: 5px; cursor: pointer;">Limpar Carrinho</button>
+    </main>
+    <footer>
+        <p>&copy; Mariana Vest</p>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cartItems = document.getElementById("cart-items");
+            const totalPrice = document.getElementById("total-price");
+            const clearCartButton = document.getElementById("clear-cart");
+            let total = 0;
 
-  <main>
-    <section id="itens-carrinho">
-      <!-- Os itens do carrinho serão inseridos aqui via JavaScript -->
-    </section>
-    <div id="total-carrinho">
-      <p>Total: R$ <span id="total"></span></p>
-      <button id="enviar-pedido">Enviar Pedido</button>
-    </div>
-  </main>
+            const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+            if (carrinho.length === 0) {
+                cartItems.innerHTML = `<tr><td colspan="5">Carrinho vazio</td></tr>`;
+                return;
+            }
 
-  <script src="script.js"></script>
+            carrinho.forEach(item => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.nome}</td>
+                    <td>R$ ${item.preco.toFixed(2)}</td>
+                    <td>${item.qtd}</td>
+                    <td>R$ ${item.subTotal}</td>
+                `;
+                cartItems.appendChild(row);
+                total += Number(item.subTotal);
+            });
+
+            totalPrice.textContent = `Total R$ ${total.toFixed(2)}`;
+
+            clearCartButton.addEventListener("click", () => {
+                if (confirm("Tem certeza de que deseja limpar o carrinho?")) {
+                    localStorage.removeItem("carrinho");
+                    location.reload();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
